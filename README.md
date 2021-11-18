@@ -33,4 +33,5 @@ Algorithm Driven (all of these have the solution in its entirety in mind prior t
 	  3: Algorithm Generation - based on a few concepts + problem components -> agent generates solution in its entirety then executes it
 	  
 Goal Expansion: The agent generates goals and implements steps as it reads the problem.
+
 SGOMS: relies on the SGOMS model of problem solving.
