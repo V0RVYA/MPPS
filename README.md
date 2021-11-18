@@ -23,11 +23,14 @@ Currently Problem models are solving: Rainfall
 
 	  Write your code using the input provided below. Please follow the preset code so that we can provide feedback as to the correctness of your answer.
 
-
+Models:
 Algorithm Driven (all of these have the solution in its entirety in mind prior to problem solving):
 
-	  1: Production only - problem solutions exist as a set of hard-wired production -> solution triggered immediately upon encountering problem of the type
+	  1: Proceduralized - problem solutions exist as a set of hard-wired production -> solution triggered immediately upon encountering problem of the type
 
-	  2: Declarative Memory innate - problem solution exists in its entirety as a set of statements in the declarative memory -> agent's productions then execute
+	  2: Algorithm Retrieval - problem solution exists in its entirety as a set of statements in the declarative memory -> agent's productions then execute
 
-	  3: Generated - based on a few concepts + problem components -> agent generates solution in its entirety then executes it
+	  3: Algorithm Generation - based on a few concepts + problem components -> agent generates solution in its entirety then executes it
+	  
+Goal Expansion: The agent generates goals and implements steps as it reads the problem.
+SGOMS: relies on the SGOMS model of problem solving.
