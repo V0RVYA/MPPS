@@ -1,18 +1,18 @@
-import ccm      
-log=ccm.log()
-log=ccm.log(html=True)   
+import python_actr      
+log=python_actr.log()
+log=python_actr.log(html=True)   
 
-from ccm.lib.actr import *  
+from python_actr import *  
 '''
 This model has the agent 
 '''
 
 
-class Problem_Sheet(ccm.Model):        # items in the environment look and act like chunks - but note the syntactic differences
-    rain_problem=ccm.Model(isa='problem', name='rainfall', status='unsolved', text_exp='calculate average of positive numbers in list , rains , stop at first -999 in list', variable = 'rains')
+class Problem_Sheet(python_actr.Model):        # items in the environment look and act like chunks - but note the syntactic differences
+    rain_problem=python_actr.Model(isa='problem', name='rainfall', status='unsolved', text_exp='calculate average of positive numbers in list , rains , stop at first -999 in list', variable = 'rains')
 #text_exp represents the problem description text, I've basically put in the simplest description of the problem.
 
-class MotorModule(ccm.Model):     # motor module handles typing actions
+class MotorModule(python_actr.Model):     # motor module handles typing actions
     def type_first(self, text):           # note that technically the motor module is outside the agent
         #yield 2
         with open('piecemeal.py', 'w') as out: 
@@ -22,7 +22,7 @@ class MotorModule(ccm.Model):     # motor module handles typing actions
         with open('piecemeal.py', 'a') as out: 
             print (text, file = out)
 
-class Chronotrans(ccm.Model):     # tracks cognitive and programming steps taken by the agent
+class Chronotrans(python_actr.Model):     # tracks cognitive and programming steps taken by the agent
     def talk(self, text):           
         #yield 0.5                    
         with open('piecemeal-talk.txt', 'a') as chrono: 
@@ -188,10 +188,10 @@ class MyAgent(ACTR): #This is the class defining the agent
 tim=MyAgent()
 env=Problem_Sheet()
 env.agent=tim 
-ccm.log_everything(env)
+python_actr.log_everything(env)
 
 env.run()
-ccm.finished()
+python_actr.finished()
 
 
 

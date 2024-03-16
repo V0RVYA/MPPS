@@ -1,16 +1,16 @@
-import ccm      
-log=ccm.log()
-log=ccm.log(html=True)   
+import python_actr      
+log=python_actr.log()
+log=python_actr.log(html=True)   
 
-from ccm.lib.actr import *  
-
-
-
-class Problem_Sheet(ccm.Model):        
-    rain_problem=ccm.Model(isa='problem', name='rainfall', status='unsolved', text_exp='Given list, sum positive numbers, stop at first -999 in list')
+from python_actr import *  
 
 
-class MotorModule(ccm.Model):     
+
+class Problem_Sheet(python_actr.Model):        
+    rain_problem=python_actr.Model(isa='problem', name='rainfall', status='unsolved', text_exp='Given list, sum positive numbers, stop at first -999 in list')
+
+
+class MotorModule(python_actr.Model):     
     def type_first(self, text):           
         #yield 2
         with open('algDM.py', 'w') as out: 
@@ -20,7 +20,7 @@ class MotorModule(ccm.Model):
         with open('algDM.py', 'a') as out: 
             print (text, file = out)
 
-class Chronotrans(ccm.Model):     # motor module handles typing actions
+class Chronotrans(python_actr.Model):     # motor module handles typing actions
     def talk(self, text):   #how the agent is able to "program"         
         #yield 0.5                    #yield keeps fucking with the motor module
         with open('algdriven-DM-talk.txt', 'a') as chrono: 
@@ -96,7 +96,7 @@ class MyAgent(ACTR):
 tim=MyAgent()
 env=Problem_Sheet()
 env.agent=tim 
-ccm.log_everything(env)
+python_actr.log_everything(env)
 
 env.run()
-ccm.finished()
+python_actr.finished()

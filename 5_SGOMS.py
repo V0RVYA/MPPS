@@ -1,4 +1,3 @@
-## The Faulty Warning Light Simulation
 
 
 # this model shows the use of ordered and situated planning units
@@ -30,25 +29,23 @@
 
 import sys
 
-#sys.path.append('C:\Users\Maria\Work\CCMSuite3-master')
-#sys.path.append('C:/Users/Robert/Documents/Development/SGOMS/CCMSuite')
-import ccm
-from random import randrange, uniform
-log=ccm.log(html=True)  
+import python_actr      
+log=python_actr.log()
+log=python_actr.log(html=True)   
 
-from ccm.lib.actr import *
+from python_actr import *  
 
 
 
 
-class MyEnvironment(ccm.Model):
+class MyEnvironment(python_actr.Model):
     
-    warning_light = ccm.Model(isa='warning_light', state='off')
+    warning_light = python_actr.Model(isa='warning_light', state='off')
 
 
 
 
-class MotorModule(ccm.Model):     # motor module handles typing actions
+class MotorModule(python_actr.Model):     # motor module handles typing actions
     def type_first(self, text):           # note that technically the motor module is outside the agent
         #yield 2
         with open('SGOMS.py', 'w') as out: 
@@ -58,7 +55,7 @@ class MotorModule(ccm.Model):     # motor module handles typing actions
         with open('SGOMS.py', 'a') as out: 
             print (text, file = out)
 
-class Chronotrans(ccm.Model):     # motor module handles typing actions
+class Chronotrans(python_actr.Model):     # motor module handles typing actions
     def talk(self, text):   #how the agent is able to "program"         
         #yield 0.5                    #yield keeps fucking with the motor module
         with open('SGOMS.txt', 'a') as chrono: 
@@ -137,7 +134,7 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_context.set('finished:nothing status:occupied condition:none variable1:none variable2:none')
         print('stop loop planning unit')
 
-    def run_ini_var(b_context='finshed:nothing status:unoccupied '):
+    def run_ini_var(b_context='finshed:?planning_unit status:unoccupied '):
         talk.talk('Goal: I should initialize the variables sum and count to track the positive numbers')        
         b_unit_task.set('unit_task:variables state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:ini_varPU cuelag:none cue:start unit_task:variables state:running')
@@ -158,7 +155,7 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_context.set('finished:nothing status:occupied condition:none variable1:none variable2:none')
         print('track variables planning unit')
 
-    def run_calc_ave(b_context='finshed:?planning_unit status:unoccupied '):
+    def run_calc_ave(b_context='finshed:?nothing status:unoccupied '):
         talk.talk('Goal: I should calculate the average of the positive numbers')        
         b_unit_task.set('unit_task:ini_varPU state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:calc_avePU cuelag:none cue:start unit_task:ini_varPU state:running')
@@ -308,6 +305,6 @@ subway = MyEnvironment()  # name the environment
 subway.agent = tim  # put the agent in the environment
 
 
-ccm.log_everything(subway)  # #print out what happens in the environment
+python_actr.log_everything(subway)  # #print out what happens in the environment
 subway.run()  # run the environment
-ccm.finished()  # stop the environment
+python_actr.finished()  # stop the environment

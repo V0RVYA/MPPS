@@ -1,8 +1,9 @@
-import ccm      
-log=ccm.log()
-log=ccm.log(html=True)   
+import python_actr      
+log=python_actr.log()
+log=python_actr.log(html=True)   
 
-from ccm.lib.actr import *  
+from python_actr import *  
+
 '''
 So this is the first model where things get a little spicy.
 This contains some minor language processing (keywords) but the focus is not on understanding the problem (i.e reading) but rather on constructing the solution (both in memory as
@@ -10,11 +11,11 @@ the instruction and in execution)
 '''
 
 
-class Problem_Sheet(ccm.Model):        # items in the environment look and act like chunks - but note the syntactic differences
-    rain_problem=ccm.Model(isa='problem', name='rainfall', status='unsolved', text_exp='Given list , calculate average of positive numbers in it , stop at first -999')
+class Problem_Sheet(python_actr.Model):        # items in the environment look and act like chunks - but note the syntactic differences
+    rain_problem=python_actr.Model(isa='problem', name='rainfall', status='unsolved', text_exp='Given list , calculate average of positive numbers in it , stop at first -999')
 #text_exp represents the problem description text, I've basically put in the simplest description of the problem.
 
-class MotorModule(ccm.Model):     # motor module handles typing actions
+class MotorModule(python_actr.Model):     # motor module handles typing actions
     def type_first(self, text):           # note that technically the motor module is outside the agent
         #yield 2
         with open('algCon.py', 'w') as out: 
@@ -24,7 +25,7 @@ class MotorModule(ccm.Model):     # motor module handles typing actions
         with open('algCon.py', 'a') as out: 
             print (text, file = out)
 
-class Chronotrans(ccm.Model):     # motor module handles typing actions
+class Chronotrans(python_actr.Model):     # motor module handles typing actions
     def talk(self, text):   #how the agent is able to "program"         
         #yield 0.5                    #yield keeps fucking with the motor module
         with open('algdriven-con-talk.txt', 'a') as chrono: 
@@ -159,10 +160,10 @@ class MyAgent(ACTR):
 tim=MyAgent()
 env=Problem_Sheet()
 env.agent=tim 
-ccm.log_everything(env)
+python_actr.log_everything(env)
 
 env.run()
-ccm.finished()
+python_actr.finished()
 
 
 '''These are associations the agent needs to have in their declarative knowledge in order to parse the text (they represent linguistic associations between problem solving steps as
