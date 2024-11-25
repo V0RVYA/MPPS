@@ -3,6 +3,7 @@ Modelling Programming Problem Solving
 
 This is an ongoing project looking to codify programming strategies used by expert and novice programmers,
 into various python ACT-R models of problem solving. Requires: https://github.com/CarletonCognitiveModelingLab/python_actr (this can be installed using "pip install python_actr")
+These models are confirmed to work with only python 3.10. No additional packages are required.
 
 Currently Problem models are solving: Rainfall
 
