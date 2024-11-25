@@ -287,6 +287,7 @@ class MyAgent(ACTR): # this is the agent that does the task
 
 
 
+
     
 tim = MyAgent()  # name the agent
 subway = MyEnvironment()  # name the environment
