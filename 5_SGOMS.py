@@ -1,55 +1,16 @@
 
-
-<<<<<<< HEAD
-# this model shows the use of ordered and situated planning units
-## an ordered planning unit is based on a stored plan to execute unit tasks in a specific order
-## a situated planning unit is a set of unit tasks that fire based on the buffer conditions
-
-# it also shows the planning unit interupt
-## this occurs when an event renders a planning unit problematic
-## then the current unit task is finished and the planning unit is ended
-## interupt is the only way to get out of a situated planning unit
-## it will also end an ordered planning unit
-### ordered planning units also end when they are completed
-
-# the task
-## the agent must setup the task by doing unit task x first
-## then unit task Y
-## this is done wih an ordered planning unit
-## after the setup the agent must randomly do unit task x or y continuosly
-## this is done with a situated planning unit
-## if the warning light goes off the agent must stop whatever planning unit they are in
-## and restart by turing off the light and setting up the task again
-## it is assumed that the light is faulty and the warnings are false
-
-## to simplify the code, all actions are assumed to be done instantiously
-## also to simplify the code, the model is set to be instantly aware of all enviornmental changes
-## the waring light comes on randomly
-
-=======
 '''
-This is a model of expert-like problem solving of the rainfall programming problems. 
+This is a model of expert-like problem solving of the rainfall programming problems.
 '''
->>>>>>> 191e850 (the commit where we realize we lost what we once had)
-
 
 import sys
-
-import python_actr      
-log=python_actr.log()
-log=python_actr.log(html=True)   
-
-from python_actr import *  
-
-
+import python_actr    
+log=python_actr.log(html=True)  
+from python_actr import *
 
 
 class MyEnvironment(python_actr.Model):
-    
-    warning_light = python_actr.Model(isa='warning_light', state='off')
-
-
-
+    pass
 
 class MotorModule(python_actr.Model):     # motor module handles typing actions
     def type_first(self, text):           # note that technically the motor module is outside the agent
@@ -57,8 +18,9 @@ class MotorModule(python_actr.Model):     # motor module handles typing actions
         with open('SGOMS.py', 'w') as out: 
             print (text, file = out)
     def type(self, text):           
-        #yield 0.5                    #including yield messes up the agent's ability to use it
-        with open('SGOMS.py', 'a') as out: 
+        #yield 0.5                   
+        #including yield messes up the agent's ability to use it
+        with open('SGOMS.py', 'a') as out:
             print (text, file = out)
 
 class Chronotrans(python_actr.Model):     # motor module handles typing actions
@@ -67,7 +29,7 @@ class Chronotrans(python_actr.Model):     # motor module handles typing actions
         with open('SGOMS.txt', 'a') as chrono: 
             print (text, file = chrono) #I'm also gonna do this for its talk-aloud and be able to make chronotranscripts
 
-class MyAgent(ACTR): # this is the agent that does the task
+class MyAgent(python_actr.ACTR): # this is the agent that does the task
 
     # module buffers
     b_DM = Buffer()
@@ -88,12 +50,9 @@ class MyAgent(ACTR): # this is the agent that does the task
 
 
     def init():
-<<<<<<< HEAD
-=======
         '''
         Declarative Memory is initialized with knowledge of the planning units. Specifially
         '''
->>>>>>> 191e850 (the commit where we realize we lost what we once had)
         DM.add('planning_unit:stop_loopPU         cuelag:none          cue:start          unit_task:condition       calling:ite_loopPU')
         DM.add('planning_unit:stop_loopPU         cuelag:start         cue:condition              unit_task:stop_loop      calling:ite_loopPU')
         DM.add('planning_unit:stop_loopPU         cuelag:condition             cue:stop_loop              unit_task:finished     calling:ite_loopPU')
@@ -135,10 +94,6 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_focus.set('none')
 
 
-
-    
-
-
     def run_stop_loop(b_context='finshed:ite_loop status:occupied '):
         talk.talk('Goal: I need to stop iterating the loop when I hit the first -999 in the list')        
         b_unit_task.set('unit_task:condition state:running pu_type:ordered')
@@ -174,9 +129,6 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_context.set('finished:nothing status:occupied condition:none variable1:none variable2:none')
         print('calculate average planning unit')
 
-
-<<<<<<< HEAD
-=======
     def run_ini_dict(b_context='finshed:?planning_unit status:unoccupied '):
         talk.talk('Goal: I should initialize a dictionary to store the counts')        
         b_unit_task.set('unit_task:variables state:running pu_type:ordered')
@@ -190,9 +142,6 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_plan_unit.set('planning_unit:ini_varPU cuelag:none cue:start unit_task:variables state:running')
         b_context.set('finished:nothing status:occupied condition:none variable1:none variable2:none')
         print('initialize variables planning unit')
-
->>>>>>> 191e850 (the commit where we realize we lost what we once had)
-
 
     def request_next_unit_task(b_plan_unit='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task state:running',
                                b_unit_task='unit_task:?unit_task state:end pu_type:ordered'):
@@ -252,8 +201,6 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_focus.set('')
         print('variables retireved')
 
-
-
     def pause(b_unit_task='unit_task:pause state:running'):
         b_unit_task.modify(state='end')
         print('pause')  
@@ -297,38 +244,12 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_unit_task.modify(state='end')  
         print('track variables payoff')
 
-
-
-
-
     def stop_loopPU(b_unit_task='unit_task:stop_loopPU state:running'):
         b_context.set('finshed:ite_loop status:occupied calling_PU:ite_loopPU')
         b_unit_task.modify(state='stopped')
         print('stopping the loop - PU')
 
-    def ite_loopPU(b_unit_task='unit_task:ite_loopPU state:running'):
-        b_context.set('finshed:ini_varPU status:unoccupied calling_PU:calc_avePU')
-        b_unit_task.modify(state='stopped')
-        print('iterating loop - PU')
 
-    def ini_varPU(b_unit_task='unit_task:ini_varPU state:running'):
-        b_context.set('finshed:nothing status:unoccupied calling_PU:calc_avePU')
-        b_unit_task.modify(state='stopped')
-        print('initializing variables - PU')
-
-    def track_varPU(b_unit_task='unit_task:track_varPU state:running'):
-        b_context.set('finshed:stop_loopPU status:unoccupied calling_PU:ite_loopPU')
-        b_unit_task.modify(state='stopped')
-        print('tracking  - PU')
-       
-
-   
-
-
-
-
-
-        
 tim = MyAgent()  # name the agent
 subway = MyEnvironment()  # name the environment
 subway.agent = tim  # put the agent in the environment
