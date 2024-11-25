@@ -278,8 +278,8 @@ class MyAgent(ACTR): # this is the agent that does the task
         DM.request('unit_task:select_data store:?')
         b_focus.set('select_data_2')
 
-    def select_data_utb(b_unit_task='unit_task:select_data state:running pu_type:ordered',
-                        
+    def select_varibs_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
+                        Memory='unit_task:select_data store:variables',
                         b_focus-'select_data_2'):
 
 
