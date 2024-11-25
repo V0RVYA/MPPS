@@ -15,10 +15,7 @@ from python_actr import *
 
 
 class MyEnvironment(python_actr.Model):
-    
-    warning_light = python_actr.Model(isa='warning_light', state='off')
-
-
+    pass    
 
 class MotorModule(python_actr.Model):     # motor module handles typing actions
     def type_first(self, text):           # note that technically the motor module is outside the agent
@@ -41,7 +38,7 @@ class MyAgent(ACTR): # this is the agent that does the task
     # module buffers
     b_DM = Buffer()
     b_motor = Buffer()
-    #b_focus = Buffer() don't need this -> are using set of goal buffers below instead
+    b_focus = Buffer() #don't need this -> are using set of goal buffers below instead
 
     # goal buffers
     b_context = Buffer()
@@ -56,43 +53,44 @@ class MyAgent(ACTR): # this is the agent that does the task
 
 
     def init():
-    '''
-    
-    When initializing the model, the Declarative Memory must be initialized with knowledge of the planning units. 
-    Specifially the planning units encode the order in which unit tasks (including other other planning units) are executed. 
+        ''' 
+        When initializing the model, the Declarative Memory must be 
+        initialized with knowledge of the planning units.
+        Specifially the planning units encode the order in which unit tasks 
+        (including other other planning units) are executed. 
 
-    The wasy planning units (and their unit tasks) are implemented & stacked is as follows:
-    data_storePU
-        select_data(UT)
-            (ini_var
-                size_set(UT)
-                name_conv(UT)
-                ini_var(UT))
-            or
-            (ini_dict
-                size_set(UT)
-                name_conv(UT)
-                ini_dict(UT))    
-        dep_wins
-            usr_in
-                request_in(UT)
-            ite_loop
-                ite_loop(UT) 
-                select_ite(UT)
-                    (track var
+        The wasy planning units (and their unit tasks) are implemented & stacked is as follows:
+        data_storePU
+            select_data(UT)
+                (ini_var
+                    size_set(UT)
+                    name_conv(UT)
+                    ini_var(UT))
+                or
+                (ini_dict
+                    size_set(UT)
+                    name_conv(UT)
+                    ini_dict(UT))    
+            dep_wins
+                usr_in
+                    request_in(UT)
+                ite_loop
+                    ite_loop(UT) 
+                    select_ite(UT)
+                        (track var
+                            condition(UT)
+                            inc_var(UT))
+                        or
+                        (track_dict
+                            condition(UT)
+                            inc_dict(UT))
+                    stop_loop
                         condition(UT)
-                        inc_var(UT))
-                    or
-                    (track_dict
-                        condition(UT)
-                        inc_dict(UT))
-                stop_loop
-                    condition(UT)
-                    stop_loop(UT)
-        pres_winsPU
-            select_comparators(UT)
+                        stop_loop(UT)
+            pres_winsPU
+                select_comparators(UT)
 
-    '''
+        '''
         # Planning Unit for overseeing of problem solving -> focal point resting on data structure used
         DM.add('planning_unit:data_storePU      cuelag:none          cue:start            unit_task:select_data    calling:none')
         DM.add('planning_unit:data_storePU      cuelag:start         cue:select_data      unit_task:dep_winsPU     calling:none')
@@ -157,29 +155,38 @@ class MyAgent(ACTR): # this is the agent that does the task
         DM.add('planning_unit:pres_winsPU       cuelag:none          cue:start            unit_task:sel_com        calling:data_storePU')
         DM.add('planning_unit:pres_winsPU       cuelag:start         cue:sel_com          unit_task:ite_loopPU     calling:data_storePU') 
         DM.add('planning_unit:pres_winsPU       cuelag:sel_com       cue:ite_loopPU       unit_task:finished       calling:data_storePU')
+        
 
+        """
         DM.add('planning_unit:stop_loopPU condition:-1 ')
         DM.add('planning_unit:ite_loopPU variable1:rains variable2:none')
         DM.add('planning_unit:ini_varPU variable1:count variable2:sum')
         DM.add('planning_unit:track_varPU condition:>=0')
         DM.add('planning_unit:track_varPU variable1:count variable2:sum')
         DM.add('planning_unit:calc_avePU variable1:count variable2:sum')
+        """
+
+        #here we allow for the selection of the teo primary means of data storage used by experts and novices
+        DM.add('unit_task:select_data store_type:dictionary')
+        DM.add('unit_task:select_data store_type:variables')
+
+        #here we define the variables or dictionary used
+        DM.('unit_task:size_set store_type:dictionary size:{}')
 
 
-        DM.add('unit_task:select_data store:dictionary')
-        DM.add('unit_task:select_data store:variables')
-
-
+        # Now we initialize our context and focus buffers
         b_context.set('finshed:nothing status:unoccupied store_type:none')
         b_focus.set('none')
 
-    '''
-    The following productions initialize the planning units. They represent the generation of goals for problem solving by exert agents.
-    They also act to intitalize that step of the problem solving process, and through interactions with the DM and the productions defining unit tasks
-    enable the agent to generate a solution program to the problem.
-    '''
+        '''
+        The following productions initialize the planning units. They represent 
+        the generation of goals for problem solving by exert agents.
+        They also act to intitalize that step of the problem solving process, 
+        and through interactions with the DM and the productions defining unit
+        asks  enable the agent to generate a solution program to the problem.
+        '''
 
-    def run_data_store(b_context='finshed:?nothing status:unoccupied'):
+    def run_data_store(b_context='finshed:nothing status:unoccupied store_type:none'):
         talk.talk('Goal: I should select a data structure to store the votes in')        
         b_unit_task.set('unit_task:select_data state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:data_storePU cuelag:none cue:start unit_task:select_data state:running')
@@ -187,35 +194,35 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_focus.set('select_data')
         print('data store planning unit')
 
-    def run_ini_var(b_context='finshed:?planning_unit status:unoccupied store_type:variables'):
+    def run_ini_var(b_context='finshed:select_varibs status:unoccupied store_type:variables'):
         talk.talk('Goal: I should create some variables to track my count(s)')        
         b_unit_task.set('unit_task:size_set state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:ini_varPU cuelag:none cue:start unit_task:size_set state:running')
         b_context.set('finished:nothing status:occupied store_type:variables')
         print('initialize variables planning unit')
 
-    def run_ini_dict(b_context='finshed:?planning_unit status:unoccupied store_type:dictionary'):
+    def run_ini_dict(b_context='finshed:select_dict status:unoccupied store_type:dictionary'):
         talk.talk('Goal: I should create a dictionary to track my count(s)')        
         b_unit_task.set('unit_task:size_set state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:ini_dictPU cuelag:none cue:start unit_task:size_set state:running')
         b_context.set('finished:nothing status:occupied store_type:dictionary')
         print('initialize dictionary planning unit')
 
-    def run_dep_wins(b_context='finshed:?planning_unit status:unoccupied store_type:?store'):
+    def run_dep_wins(b_context='finshed:?planning_unit status:unoccupied store_type:?store!none'):
         talk.talk('Goal: I need to track counts by department')        
         b_unit_task.set('unit_task:usr_inPU state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:dep_winsPU cuelag:none cue:start unit_task:usr_inPU state:running')
         b_context.set('finished:nothing status:occupied store_type:?store')
         print('initialize department winners planning unit')
 
-    def run_usr_in(b_context='finshed:?planning_unit status:unoccupied store_type:?store'):
+    def run_usr_in(b_context='finshed:?planning_unit status:unoccupied store_type:?store!none'):
         talk.talk('Goal: I need to request input from the user')        
         b_unit_task.set('unit_task:request_in state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:usr_inPU cuelag:none cue:start unit_task:request_in state:running')
         b_context.set('finished:nothing status:occupied store_type:?store')
         print('initialize user input planning unit')
     
-    def run_ite_loop(b_context='finshed:?planning_unit status:unoccupied store_type:?store'):
+    def run_ite_loop(b_context='finshed:?planning_unit status:unoccupied store_type:?store!none'):
         talk.talk('Goal: I need to iterate through a set')        
         b_unit_task.set('unit_task:ite_loop state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:ite_loopPU cuelag:none cue:start unit_task:ite_loop state:running')
@@ -231,28 +238,28 @@ class MyAgent(ACTR): # this is the agent that does the task
 
     def run_track_dict(b_context='finshed:?planning_unit status:unoccupied store_type:dictionary'):
         talk.talk('Goal: I need to increment the proper slot in the dictionary')        
-        b_unit_task.set('unit_task:condition state:running pu_type:ordered')
+        b_unit_task.set('unit_task:condition state:running  pu_type:ordered')
         b_plan_unit.set('planning_unit:track_dictPU cuelag:none cue:start unit_task:condition state:running')
         b_context.set('finished:nothing status:occupied store_type:dictionary')
         print('initialize track variables planning unit')
 
-    def run_stop_loop(b_context='finshed:?planning_unit status:unoccupied store_type:?store'):
+    def run_stop_loop(b_context='finshed:?planning_unit status:unoccupied store_type:?store!none'):
         talk.talk('Goal: I need to stop iterating the loop when I hit the terminal signal')        
         b_unit_task.set('unit_task:condition state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:stop_loopPU cuelag:none cue:start unit_task:condition state:running calling_PU:ite_loopPU')
         b_context.set('finished:nothing status:occupied store_type:?store')
         print('stop loop planning unit')
 
-    def run_pres_winner(b_context='finshed:?planning_unit status:unoccupied store_type:?store'):
+    def run_pres_winner(b_context='finshed:?planning_unit status:unoccupied store_type:?store!none'):
         talk.talk('Goal: I need to calculate the winner')        
         b_unit_task.set('unit_task:condition state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:stop_loopPU cuelag:none cue:start unit_task:condition state:running calling_PU:ite_loopPU')
         b_context.set('finished:nothing status:occupied store_type:?store')
         print('stop loop planning unit')
     
-    """
+        """
         The following productions cycle through the unit tasks that compose the productions.
-    """
+        """
 
     def request_next_unit_task(b_plan_unit='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task state:running',
                                b_unit_task='unit_task:?unit_task state:end pu_type:ordered'):
@@ -269,19 +276,31 @@ class MyAgent(ACTR): # this is the agent that does the task
         print('ordered planning unit: next unit_task = ')
         print(unit_task)
     
-    """
+        """
         The following productions execute the unit tasks necessary for problem solving.
-    """
-    
+        """
+    #The select_ productions select the data type by retrieving a data type from memory and starting the right planning unit associated with that store type
+    #These productions bypass the 
     def select_data_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
                        b_focus='select_data'):
         DM.request('unit_task:select_data store:?')
         b_focus.set('select_data_2')
 
     def select_varibs_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
-                        Memory='unit_task:select_data store:variables',
-                        b_focus-'select_data_2'):
+                        b_DM='unit_task:select_data store_type:variables',
+                        b_focus='select_data_2'):
+        b_context.set('finshed:select_varibs status:unoccupied store_type:variables')
+    
+    def select_dicts_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
+                        b_DM='unit_task:select_data store_type:dictionary',
+                        b_focus='select_data_2'):
+        b_context.set('finshed:select_dict status:unoccupied store_type:dictionary')
+        b_focus.set('none')
 
+    # The size set productions retrieve a known size of data_store and initialize the data store 
+    def size_set_vars1(b_unit_task='unit_task:size_set state:running pu_type:order',
+                       b_plan_unit='planning_unit:ini_varPU cuelag:none cue:start unit_task:size_set state:running'):
+        DM.request('')
 
 
 
