@@ -56,43 +56,43 @@ class MyAgent(ACTR): # this is the agent that does the task
 
 
     def init():
-        '''
-        
-        When initializing the model, the Declarative Memory must be initialized with knowledge of the planning units. 
-        Specifially the planning units encode the order in which unit tasks (including other other planning units) are executed. 
+    '''
+    
+    When initializing the model, the Declarative Memory must be initialized with knowledge of the planning units. 
+    Specifially the planning units encode the order in which unit tasks (including other other planning units) are executed. 
 
-        The wasy planning units (and their unit tasks) are implemented & stacked is as follows:
-        data_storePU
-            select_data(UT)
-                (ini_var
-                    size_set(UT)
-                    name_conv(UT)
-                    ini_var(UT))
-                or
-                (ini_dict
-                    size_set(UT)
-                    name_conv(UT)
-                    ini_dict(UT))    
-            dep_wins
-                usr_in
-                    request_in(UT)
-                ite_loop
-                    ite_loop(UT) 
-                    select_ite(UT)
-                        (track var
-                            condition(UT)
-                            inc_var(UT))
-                        or
-                        (track_dict
-                            condition(UT)
-                            inc_dict(UT))
-                    stop_loop
+    The wasy planning units (and their unit tasks) are implemented & stacked is as follows:
+    data_storePU
+        select_data(UT)
+            (ini_var
+                size_set(UT)
+                name_conv(UT)
+                ini_var(UT))
+            or
+            (ini_dict
+                size_set(UT)
+                name_conv(UT)
+                ini_dict(UT))    
+        dep_wins
+            usr_in
+                request_in(UT)
+            ite_loop
+                ite_loop(UT) 
+                select_ite(UT)
+                    (track var
                         condition(UT)
-                        stop_loop(UT)
-            pres_winsPU
-                select_comparators(UT)
+                        inc_var(UT))
+                    or
+                    (track_dict
+                        condition(UT)
+                        inc_dict(UT))
+                stop_loop
+                    condition(UT)
+                    stop_loop(UT)
+        pres_winsPU
+            select_comparators(UT)
 
-        '''
+    '''
         # Planning Unit for overseeing of problem solving -> focal point resting on data structure used
         DM.add('planning_unit:data_storePU      cuelag:none          cue:start            unit_task:select_data    calling:none')
         DM.add('planning_unit:data_storePU      cuelag:start         cue:select_data      unit_task:dep_winsPU     calling:none')
@@ -166,6 +166,10 @@ class MyAgent(ACTR): # this is the agent that does the task
         DM.add('planning_unit:calc_avePU variable1:count variable2:sum')
 
 
+        DM.add('unit_task:select_data store:dictionary')
+        DM.add('unit_task:select_data store:variables')
+
+
         b_context.set('finshed:nothing status:unoccupied store_type:none')
         b_focus.set('none')
 
@@ -180,6 +184,7 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_unit_task.set('unit_task:select_data state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:data_storePU cuelag:none cue:start unit_task:select_data state:running')
         b_context.set('finished:nothing status:occupied store_type:none')
+        b_focus.set('select_data')
         print('data store planning unit')
 
     def run_ini_var(b_context='finshed:?planning_unit status:unoccupied store_type:variables'):
@@ -256,12 +261,29 @@ class MyAgent(ACTR): # this is the agent that does the task
         print('ordered planning unit: finished unit task = ')
         print(unit_task)
         # save completed unit task here
+    
     def retrieved_next_unit_task(b_plan_unit='state:retrieve',
                                  b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task!finished'):
         b_plan_unit.set('planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task state:running')
         b_unit_task.set('unit_task:?unit_task state:running pu_type:ordered')
         print('ordered planning unit: next unit_task = ')
         print(unit_task)
+    
+    """
+        The following productions execute the unit tasks necessary for problem solving.
+    """
+    
+    def select_data_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
+                       b_focus='select_data'):
+        DM.request('unit_task:select_data store:?')
+        b_focus.set('select_data_2')
+
+    def select_data_utb(b_unit_task='unit_task:select_data state:running pu_type:ordered',
+                        
+                        b_focus-'select_data_2'):
+
+
+
 
 
 
