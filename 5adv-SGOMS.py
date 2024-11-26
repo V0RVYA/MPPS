@@ -54,10 +54,8 @@ class MyAgent(ACTR): # this is the agent that does the task
 
     def init():
         ''' 
-        When initializing the model, the Declarative Memory must be 
-        initialized with knowledge of the planning units.
-        Specifially the planning units encode the order in which unit tasks 
-        (including other other planning units) are executed. 
+        When initializing the model, the Declarative Memory must be initialized with knowledge of the planning units.
+        Specifially the planning units encode the order in which unit tasks(including other other planning units) are executed. 
 
         The wasy planning units (and their unit tasks) are implemented & stacked is as follows:
         data_storePU
@@ -93,8 +91,9 @@ class MyAgent(ACTR): # this is the agent that does the task
         '''
         # Planning Unit for overseeing of problem solving -> focal point resting on data structure used
         DM.add('planning_unit:data_storePU      cuelag:none          cue:start            unit_task:select_data    calling:none')
-        DM.add('planning_unit:data_storePU      cuelag:start         cue:select_data      unit_task:dep_winsPU     calling:none')
-        DM.add('planning_unit:data_storePU      cuelag:select_data   cue:dep_winsPU       unit_task:pres_winPU     calling:none')
+        DM.add('planning_unit:data_storePU      cuelag:start         cue:select_data      unit_task:ini_varPU      calling:none')
+        DM.add('planning_unit:data_storePU      cuelag:select_data   cue:ini_varPU        unit_task:dep_winsPU     calling:none')
+        DM.add('planning_unit:data_storePU      cuelag:ini_varPU     cue:dep_winsPU       unit_task:pres_winPU     calling:none')
         DM.add('planning_unit:data_storePU      cuelag:dep_winsPU    cue:pres_winsPU      unit_task:finished       calling:none')
 
 
@@ -171,7 +170,8 @@ class MyAgent(ACTR): # this is the agent that does the task
         DM.add('unit_task:select_data store_type:variables')
 
         #here we define the variables or dictionary used
-        DM.('unit_task:size_set store_type:dictionary size:{}')
+        DM.add('unit_task:size_set store_type:dictionary defined:{(A:),(H:),(S:)}')
+        DM.add('unit_task:size_set store_type:variables defined:(AR, AB, HR, HB, SR, SB)')
 
 
         # Now we initialize our context and focus buffers
@@ -258,24 +258,35 @@ class MyAgent(ACTR): # this is the agent that does the task
         print('stop loop planning unit')
     
         """
-        The following productions cycle through the unit tasks that compose the productions.
+        The following productions cycle through the unit tasks that compose the productions. They respond differently between planning
+        units as unit_tasks for the callable planning unit, and unit_tasks (interacting with the motor module)
+        
         """
-
-    def request_next_unit_task(b_plan_unit='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task state:running',
+        
+        #The following production uses a complete unit task and the current planning unit to request the next unit task
+    def request_next_unit_task(b_plan_unit='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task calling:?calling',
                                b_unit_task='unit_task:?unit_task state:end pu_type:ordered'):
-        DM.request('planning_unit:?planning_unit cue:?unit_task unit_task:? cuelag:?cue')
-        b_plan_unit.set('planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task state:retrieve')  # next unit task
+        DM.request('planning_unit:?planning_unit cuelag:?cue cue:?unit_task unit_task:?new_unit calling:?calling')
         print('ordered planning unit: finished unit task = ')
         print(unit_task)
-        # save completed unit task here
-    
-    def retrieved_next_unit_task(b_plan_unit='state:retrieve',
+        b_unit_task.set('unit_task:none state:retrieve pu_type:ordered')  # next unit task
+        
+        #The following production fires when there is a next unit task in the planning unit
+    def retrieved_next_unit_task(b_unit_task='unit_task:none state:retrieve pu_type:ordered',
+                                 b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task!finished'):
+        b_plan_unit.set('planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task!finished')
+        b_unit_task.set('unit_task:?unit_task!finished state:running pu_type:ordered')
+        print('ordered planning unit: next unit_task = ')
+        print(unit_task)
+        
+        #The following production fires when there is no next unit task and this is a "called" production
+    def retrieved_last_ut_called(b_unit_task='unit_task:none state:retrieve pu_type:ordered',
                                  b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task!finished'):
         b_plan_unit.set('planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task state:running')
         b_unit_task.set('unit_task:?unit_task state:running pu_type:ordered')
         print('ordered planning unit: next unit_task = ')
         print(unit_task)
-    
+ 
         """
         The following productions execute the unit tasks necessary for problem solving.
         """
@@ -299,7 +310,8 @@ class MyAgent(ACTR): # this is the agent that does the task
 
     # The size set productions retrieve a known size of data_store and initialize the data store 
     def size_set_vars1(b_unit_task='unit_task:size_set state:running pu_type:order',
-                       b_plan_unit='planning_unit:ini_varPU cuelag:none cue:start unit_task:size_set state:running'):
+                       b_plan_unit='planning_unit:?planning_unit cuelag:none cue:start unit_task:size_set state:running',
+                       b_context='finished:nothing status:occupied store_type:?type'):
         DM.request('')
 
 
