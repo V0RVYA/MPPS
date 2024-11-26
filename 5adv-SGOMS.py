@@ -281,11 +281,11 @@ class MyAgent(ACTR): # this is the agent that does the task
         
         #The following production fires when there is no next unit task and this is a "called" production
     def retrieved_last_ut_called(b_unit_task='unit_task:none state:retrieve pu_type:ordered',
-                                 b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task!finished'):
-        b_plan_unit.set('planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task state:running')
+                                 b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:finished calling:?calling'):
+        b_plan_unit.set('planning_unit:?calling cuelag:? cue:?planning_unit unit_task:?unit_task state:running')
         b_unit_task.set('unit_task:?unit_task state:running pu_type:ordered')
-        print('ordered planning unit: next unit_task = ')
-        print(unit_task)
+        print('ordered planning unit: finished planning_unit = ')
+        print(plan_unit)
  
         """
         The following productions execute the unit tasks necessary for problem solving.
