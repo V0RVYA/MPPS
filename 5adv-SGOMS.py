@@ -189,7 +189,7 @@ class MyAgent(ACTR): # this is the agent that does the task
     def run_data_store(b_context='finshed:nothing status:unoccupied store_type:none'):
         talk.talk('Goal: I should select a data structure to store the votes in')        
         b_unit_task.set('unit_task:select_data state:running pu_type:ordered')
-        b_plan_unit.set('planning_unit:data_storePU cuelag:none cue:start unit_task:select_data state:running')
+        b_plan_unit.set('planning_unit:data_storePU cuelag:none cue:start unit_task:select_data')
         b_context.set('finished:nothing status:occupied store_type:none')
         b_focus.set('select_data')
         print('data store planning unit')
@@ -197,21 +197,21 @@ class MyAgent(ACTR): # this is the agent that does the task
     def run_ini_var(b_context='finshed:select_varibs status:unoccupied store_type:variables'):
         talk.talk('Goal: I should create some variables to track my count(s)')        
         b_unit_task.set('unit_task:size_set state:running pu_type:ordered')
-        b_plan_unit.set('planning_unit:ini_varPU cuelag:none cue:start unit_task:size_set state:running')
+        b_plan_unit.set('planning_unit:ini_varPU cuelag:none cue:start unit_task:size_set calling:data_storePU')
         b_context.set('finished:nothing status:occupied store_type:variables')
         print('initialize variables planning unit')
 
     def run_ini_dict(b_context='finshed:select_dict status:unoccupied store_type:dictionary'):
         talk.talk('Goal: I should create a dictionary to track my count(s)')        
         b_unit_task.set('unit_task:size_set state:running pu_type:ordered')
-        b_plan_unit.set('planning_unit:ini_dictPU cuelag:none cue:start unit_task:size_set state:running')
+        b_plan_unit.set('planning_unit:ini_dictPU cuelag:none cue:start unit_task:size_set calling:data_storePU')
         b_context.set('finished:nothing status:occupied store_type:dictionary')
         print('initialize dictionary planning unit')
 
     def run_dep_wins(b_context='finshed:?planning_unit status:unoccupied store_type:?store!none'):
         talk.talk('Goal: I need to track counts by department')        
         b_unit_task.set('unit_task:usr_inPU state:running pu_type:ordered')
-        b_plan_unit.set('planning_unit:dep_winsPU cuelag:none cue:start unit_task:usr_inPU state:running')
+        b_plan_unit.set('planning_unit:dep_winsPU cuelag:none cue:start unit_task:usr_inPU calling:data_storePU')
         b_context.set('finished:nothing status:occupied store_type:?store')
         print('initialize department winners planning unit')
 
@@ -239,27 +239,27 @@ class MyAgent(ACTR): # this is the agent that does the task
     def run_track_dict(b_context='finshed:?planning_unit status:unoccupied store_type:dictionary'):
         talk.talk('Goal: I need to increment the proper slot in the dictionary')        
         b_unit_task.set('unit_task:condition state:running  pu_type:ordered')
-        b_plan_unit.set('planning_unit:track_dictPU cuelag:none cue:start unit_task:condition state:running')
+        b_plan_unit.set('planning_unit:track_dictPU cuelag:none cue:start unit_task:condition calling:')
         b_context.set('finished:nothing status:occupied store_type:dictionary')
         print('initialize track variables planning unit')
 
     def run_stop_loop(b_context='finshed:?planning_unit status:unoccupied store_type:?store!none'):
         talk.talk('Goal: I need to stop iterating the loop when I hit the terminal signal')        
         b_unit_task.set('unit_task:condition state:running pu_type:ordered')
-        b_plan_unit.set('planning_unit:stop_loopPU cuelag:none cue:start unit_task:condition state:running calling_PU:ite_loopPU')
+        b_plan_unit.set('planning_unit:stop_loopPU cuelag:none cue:start unit_task:condition calling:ite_loopPU')
         b_context.set('finished:nothing status:occupied store_type:?store')
         print('stop loop planning unit')
 
     def run_pres_winner(b_context='finshed:?planning_unit status:unoccupied store_type:?store!none'):
         talk.talk('Goal: I need to calculate the winner')        
         b_unit_task.set('unit_task:condition state:running pu_type:ordered')
-        b_plan_unit.set('planning_unit:stop_loopPU cuelag:none cue:start unit_task:condition state:running calling_PU:ite_loopPU')
+        b_plan_unit.set('planning_unit:stop_loopPU cuelag:none cue:start unit_task:condition calling:ite_loopPU')
         b_context.set('finished:nothing status:occupied store_type:?store')
         print('stop loop planning unit')
     
         """
         The following productions cycle through the unit tasks that compose the productions. They respond differently between planning
-        units as unit_tasks for the callable planning unit, and unit_tasks (interacting with the motor module)
+        units as unit_tasks for the calling planning unit, and unit_tasks as those interacting with the motor module
         
         """
         
@@ -279,14 +279,22 @@ class MyAgent(ACTR): # this is the agent that does the task
         print('ordered planning unit: next unit_task = ')
         print(unit_task)
         
-        #The following production fires when there is no next unit task and this is a "called" production
+        #The following production fires when there is no next unit task and this is a "called" planning unit 
+        #This production requests the calling planning_unit 
     def retrieved_last_ut_called(b_unit_task='unit_task:none state:retrieve pu_type:ordered',
                                  b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:finished calling:?calling'):
-        b_plan_unit.set('planning_unit:?calling cuelag:? cue:?planning_unit unit_task:?unit_task state:running')
-        b_unit_task.set('unit_task:?unit_task state:running pu_type:ordered')
+        DM.request('planning_unit:?calling cuelag:?cuel cue:?planning_unit unit_task:?unit_task')
+        focus.set('retrieving calling')
         print('ordered planning unit: finished planning_unit = ')
         print(plan_unit)
- 
+    
+        #This production then adjusts the plan_unit and context buffers to resume the calling planning unit
+    def to_calling_planning_unit(b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task',
+                                 b_context='finished:?finished status:?status store_type:?type',
+                                 focus='retrieving calling'):
+        b_context.set('finished:?cue status:unoccupied store_type:?type')
+        b_plan_unit.set('planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?unit_task')
+
         """
         The following productions execute the unit tasks necessary for problem solving.
         """
@@ -312,7 +320,7 @@ class MyAgent(ACTR): # this is the agent that does the task
     def size_set_vars1(b_unit_task='unit_task:size_set state:running pu_type:order',
                        b_plan_unit='planning_unit:?planning_unit cuelag:none cue:start unit_task:size_set state:running',
                        b_context='finished:nothing status:occupied store_type:?type'):
-        DM.request('')
+        DM.request('unit_task:size_set store_type:?')
 
 
 
