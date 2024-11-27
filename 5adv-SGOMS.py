@@ -110,16 +110,14 @@ class MyAgent(ACTR): # this is the agent that does the task
 
         #Planning unit that handles the initialization of variables, once they has been selected. 
         DM.add('planning_unit:ini_varPU         cuelag:none          cue:start            unit_task:size_set       task_type:tunit    calling:data_storePU')
-        DM.add('planning_unit:ini_varPU         cuelag:start         cue:size_set         unit_task:name_conv      task_type:tunit    calling:data_storePU')
-        DM.add('planning_unit:ini_varPU         cuelag:size_set      cue:name_conv        unit_task:ini_var        task_type:tunit    calling:data_storePU')
-        DM.add('planning_unit:ini_varPU         cuelag:name_conv     cue:ini_var          unit_task:finished       task_type:finish   calling:data_storePU')
+        DM.add('planning_unit:ini_varPU         cuelag:start         cue:size_set         unit_task:ini_var        task_type:tunit    calling:data_storePU')
+        DM.add('planning_unit:ini_varPU         cuelag:size_set      cue:ini_var          unit_task:finished       task_type:finish   calling:data_storePU')
 
 
         #Planning unit that handles the initialization of the dictionary, once it has been selected. 
         DM.add('planning_unit:ini_dictPU        cuelag:none          cue:start            unit_task:size_set       task_type:tunit    calling:data_storePU')
-        DM.add('planning_unit:ini_dictPU        cuelag:start         cue:size_set         unit_task:name_conv      task_type:tunit    calling:data_storePU')
-        DM.add('planning_unit:ini_dictPU        cuelag:size_set      cue:name_conv        unit_task:ini_dict       task_type:tunit    calling:data_storePU')
-        DM.add('planning_unit:ini_dictPU        cuelag:name_conv     cue:ini_dict         unit_task:finished       task_type:finish   calling:data_storePU')
+        DM.add('planning_unit:ini_dictPU        cuelag:start         cue:size_set         unit_task:ini_dict       task_type:tunit    calling:data_storePU')
+        DM.add('planning_unit:ini_dictPU        cuelag:size_set      cue:ini_dict         unit_task:finished       task_type:finish   calling:data_storePU')
         
         #Planning unit that calculates departmental winners 
         DM.add('planning_unit:dep_winsPU        cuelag:start         cue:usr_inPU         unit_task:ite_loopPU     task_type:punit    calling:data_storePU') 
@@ -172,14 +170,14 @@ class MyAgent(ACTR): # this is the agent that does the task
         DM.add('unit_task:select_data store_type:variables')
 
         #here we define the variables or dictionary used
-        DM.add('unit_task:size_set store_type:dictionary defined:{(A:),(H:),(S:)}')
-        DM.add('unit_task:size_set store_type:variables defined:(AR, AB, HR, HB, SR, SB)')
+        DM.add('unit_task:size_set store_type:dictionary data_def:{(A:),(H:),(S:)}')
+        DM.add('unit_task:size_set store_type:variables data_def:(AR, AB, HR, HB, SR, SB)')
 
 
         # Now we initialize our context and focus buffers
         #To save time and not do the keyword nonesense, we assume the expert SGOMs agent is initialized to start 
         #with the data store production
-        b_context.set('planning_unit:data_storePU finshed:nothing status:unoccupied store_type:none')
+        b_context.set('planning_unit:data_storePU finished:nothing status:unoccupied store_type:none data_def:none')
         b_focus.set('retrieve PU')
 
         '''
@@ -199,7 +197,7 @@ class MyAgent(ACTR): # this is the agent that does the task
         #The following production should be replaced by some productions that translate problem statement keywords 
         #into selecting the good starting (orienting) planning unit. however for the sake of simplicity I have just made
         #this into the initial productions and it gets the ball rolling.
-    def retrieve_initial_punit(b_context='planning_unit:data_storePU finished:nothing status:unoccupied store_type:none',
+    def retrieve_initial_punit(b_context='planning_unit:data_storePU finished:nothing status:unoccupied store_type:none data_def:none',
                                b_focus='retrieve PU'):
         talk.talk('I think I should..')
         DM.request('planning_unit:data_storePU cuelag:none cue:start unit_task:?unit_task task_type:?unit calling:none')
@@ -210,13 +208,13 @@ class MyAgent(ACTR): # this is the agent that does the task
 
         '''
 
-    def run_planning_unit(b_context='planning_unit:?planning_unit finshed:nothing status:unoccupied store_type:?stype',
+    def run_planning_unit(b_context='planning_unit:?planning_unit finished:nothing status:unoccupied store_type:?stype data_def:?data_def',
                           b_DM='planning_unit:?planning_unit cuelag:none cue:start unit_task:?unit_task task_type:?ttype calling:?calling',
                           b_focus='retrieve first task'):
         b_unit_task.set('unit_task:?unit_task state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:?planning_unit cuelag:none cue:start unit_task:?unit_task task_type:?ttype calling:?calling')
-        talk.talk('execute the goal' planning_unit)        
-        b_context.set('planning_unit:?planning_unit finished:nothing status:occupied store_type:?stype')
+        talk.talk('execute the goal ' + planning_unit)        
+        b_context.set('planning_unit:?planning_unit finished:nothing status:occupied store_type:?stype data_def:?data_def')
         b_focus.set('unit task')
         print('running planning unit ')
        
@@ -243,59 +241,61 @@ class MyAgent(ACTR): # this is the agent that does the task
 
 
 
-    def planning_unit_runpunit(b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?punit task_type:punit calling:?calling'.
+    def planning_unit_runpunit(b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?punit task_type:punit calling:?calling',
                                b_focus='retrieving next step',
-                               b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?type'):
+                               b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?type data_def:?data_def'):
         DM.request('planning_unit:?punit cuelag:none cue:start unit_task:?unit_task task_type:?type calling:?planning_unit')
-        b_context.set('planning_unit:?punit finished:nothing status:unoccupied store_type:?type')
+        b_context.set('planning_unit:?punit finished:nothing status:unoccupied store_type:?type data_def:?data_def')
         b_focus.set('retrieve first task')
 
     def planning_unit_runtunit(b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?tunit task_type:tunit calling:?calling',
                                b_focus='retrieving next step',
-                               b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?type'):
-        b_context.set('planning_unit:?planning_unit finished:nothing status:occupied store_type:?type')
+                               b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?type data_def:?data_def'):
+        b_context.set('planning_unit:?planning_unit finished:nothing status:occupied store_type:?type data_def:?data_def')
         b_plan_unit.set('planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?tunit task_type:tunit calling:?calling')
         b_unit_task.set('unit_task:?tunit state:running pu_type:ordered')
         b_focus('unit task')
 
-    def retrieve_calling_unit(b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?type',
+    def retrieve_calling_unit(b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?type data_def:?data_def',
                               b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:finished task_type:?unit calling:?calling',
                               b_focus='retrieving next step'):
         talk.talk('I think I should..')
         DM.request('planning_unit:?calling cuelag:?cuel cue:?planning_unit unit_task:?u_task calling:?call')
-        b_context.set('planning_unit:?calling finished:?planning_unit status:unoccupied store_type:?type')
+        b_context.set('planning_unit:?calling finished:?planning_unit status:unoccupied store_type:?type data_def:?data_def')
         b_focus.set('retrieving next step')
        
 
-       """
+        """
         The following productions execute the unit tasks necessary for problem solving.
         """
     #The select_ productions select the data type by retrieving a data type from memory and starting the right planning unit associated with that store type
     #These productions bypass the 
     def select_data_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
-                       b_focus='unit_task'):
+                       b_focus='unit task'):
         DM.request('unit_task:select_data store:?')
-        b_focus.set('select_data_2')
+        b_focus.set('select data 2')
 
-    def select_varibs_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
-                        b_DM='unit_task:select_data store_type:variables',
-                        b_focus='select_data_2'):
-        b_context.set('finshed:select_varibs status:unoccupied store_type:variables')
+    def selected_data_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
+                         b_DM='unit_task:select_data store_type:?stype',
+                         b_focus='select data 2'):
+        b_context.set('finished:select_data status:unoccupied store_type:?stype data_def:none')
         b_unit_task.set('unit_task:select_data state:end pu_type:ordered')
         b_focus.set('next unit')
-    
-    def select_dicts_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
-                        b_DM='unit_task:select_data store_type:dictionary',
-                        b_focus='select_data_2'):
-        b_context.set('finshed:select_dict status:unoccupied store_type:dictionary')
-        b_unit_task.set('unit_task:select_data state:end pu_type:ordered')
-        b_focus.set('next_unit')
+
 
     # The size set productions retrieve a known size of data_store and initialize the data store 
-    def size_set_vars1(b_unit_task='unit_task:size_set state:running pu_type:order',
-                       b_plan_unit='planning_unit:?planning_unit cuelag:none cue:start unit_task:size_set state:running',
-                       b_context='finished:nothing status:occupied store_type:?type'):
-        DM.request('unit_task:size_set store_type:?')
+    def size_set(b_unit_task='unit_task:size_set state:running pu_type:ordered',
+                 b_plan_unit='planning_unit:?planning_unit cuelag:none cue:start unit_task:size_set state:running',
+                 b_focus='unit task'):
+        DM.request('unit_task:size_set store_type:?stype data_def:?data')
+        b_focus.set('size set 2')
+
+    def size_set_too(b_DM='unit_task:size_set store_type:?stype data_def:?data_def',
+                     b_context='planning_unit:?planning_unit finished:nothing status:occupied store_type:?stype data_def:none',
+                     b_focus='size set 2'):
+        b_context.set('planning_unit:?planning_unit finished:size_set status:unoccupied store_type:?stype data_def:?data_def')
+        b_unit_task.set('unit_task:size_set state:end pu_type:ordered')
+        b_focus.set('next unit')
 
 
 
