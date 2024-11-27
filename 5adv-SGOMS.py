@@ -170,7 +170,7 @@ class MyAgent(ACTR): # this is the agent that does the task
         DM.add('unit_task:select_data store_type:variables')
 
         #here we define the variables or dictionary used
-        DM.add('unit_task:size_set store_type:dictionary data_def:{(A:),(H:),(S:)}')
+        DM.add('unit_task:size_set store_type:dictionary data_def:((A:),(H:),(S:))')
         DM.add('unit_task:size_set store_type:variables data_def:(AR, AB, HR, HB, SR, SB)')
 
 
@@ -181,18 +181,25 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_focus.set('retrieve PU')
 
         '''
-        The following productions initialize the planning units. They represent 
-        the generation of goals for problem solving by exert agents.
-        They also act to intitalize that step of the problem solving process, 
-        and through interactions with the DM and the productions defining unit
-        asks  enable the agent to generate a solution program to the problem.
+        
+        The following productions handle planning units declared in the DM. 
+
+        retrieve_initial_punit: starts us off -> will only fire once should be made more general 
+
+        run_planning_unit: once first step of planning unit retrieved then start executirng steps of planning unit
+
+        retrieve_calling_unit: when all utasks of a punit are complete -> production check if punit was called and returns the context to the
+        appropriate calling planning unit + requests the next step
+
+        planning_unit_runpunit: when retrieved step is a planning unit -> switches context to the new called planning unit, and requests first step
+
+        planning_unit_runtunit: when retrieved step is a unit task -> updates unit task buffer -> trigger desired unit task
+
+        retrieve_next_unit_task: once unit task complete retrieve next unit task from memory
 
 
         Most of this will be moved to a "prefrontal cortex" module for act-r. And will be generalized to allow
         for hierarchical goal behaviour across all probelm domains. 
-        '''
-        '''
-        The production set below handles the retrieval of planning units
         '''
         #The following production should be replaced by some productions that translate problem statement keywords 
         #into selecting the good starting (orienting) planning unit. however for the sake of simplicity I have just made
@@ -202,11 +209,6 @@ class MyAgent(ACTR): # this is the agent that does the task
         talk.talk('I think I should..')
         DM.request('planning_unit:data_storePU cuelag:none cue:start unit_task:?unit_task task_type:?unit calling:none')
         b_focus.set('retrieve first task')
-
-        '''
-        run_planning_unit: once punit in context and first step retrieved -> begin executing unit tasks of punit
-
-        '''
 
     def run_planning_unit(b_context='planning_unit:?planning_unit finished:nothing status:unoccupied store_type:?stype data_def:?data_def',
                           b_DM='planning_unit:?planning_unit cuelag:none cue:start unit_task:?unit_task task_type:?ttype calling:?calling',
@@ -218,20 +220,6 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_focus.set('unit task')
         print('running planning unit ')
        
-        '''
-        retrieve_calling_unit: when all utasks of a punit are complete -> production check if punit was called and returns the context to the
-        appropriate calling planning unit + requests the next step
-
-        planning_unit_runpunit: when retrieved step is a planning unit -> switches context to new called planning unit, and requests first step
-
-
-        planning_unit_runtunit: when retrieved step is a unit task -> updates unit task buffer -> trigger desired unit task
-
-        retrieve_next_unit_task:
-
-        '''
-
-
 
     def retrieve_nxt_unit_task(b_unit_task='unit_task:?tunit state:end pu_type:ordered',
                                b_plan_unit='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?tunit task_type:?ttype calling:?calling',
@@ -243,9 +231,9 @@ class MyAgent(ACTR): # this is the agent that does the task
 
     def planning_unit_runpunit(b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?punit task_type:punit calling:?calling',
                                b_focus='retrieving next step',
-                               b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?type data_def:?data_def'):
-        DM.request('planning_unit:?punit cuelag:none cue:start unit_task:?unit_task task_type:?type calling:?planning_unit')
-        b_context.set('planning_unit:?punit finished:nothing status:unoccupied store_type:?type data_def:?data_def')
+                               b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?stype data_def:?data_def'):
+        b_context.set('planning_unit:?punit finished:nothing status:unoccupied store_type:?stype data_def:?data_def')
+        DM.request('planning_unit:?punit cuelag:none cue:start unit_task:?unit_task task_type:?ttype calling:?planning_unit')
         b_focus.set('retrieve first task')
 
     def planning_unit_runtunit(b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?tunit task_type:tunit calling:?calling',
@@ -260,8 +248,8 @@ class MyAgent(ACTR): # this is the agent that does the task
                               b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:finished task_type:?unit calling:?calling',
                               b_focus='retrieving next step'):
         talk.talk('I think I should..')
-        DM.request('planning_unit:?calling cuelag:?cuel cue:?planning_unit unit_task:?u_task calling:?call')
         b_context.set('planning_unit:?calling finished:?planning_unit status:unoccupied store_type:?type data_def:?data_def')
+        DM.request('planning_unit:?calling cuelag:?cuel cue:?planning_unit unit_task:?u_task calling:?call')
         b_focus.set('retrieving next step')
        
 
@@ -272,20 +260,31 @@ class MyAgent(ACTR): # this is the agent that does the task
     #These productions bypass the 
     def select_data_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
                        b_focus='unit task'):
-        DM.request('unit_task:select_data store:?')
+        DM.request('unit_task:select_data store_type:?stype')
         b_focus.set('select data 2')
 
-    def selected_data_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
+    def selected_varib_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
+                          b_context='planning_unit:?planning_unit finished:?finished status:occupied data_def:none',
+                          b_DM='unit_task:select_data store_type:?stype',
+                          b_focus='select data 2'):
+        b_context.set('planning_unit:?planning_unit finished:select_data status:unoccupied store_type:?stype data_def:none')
+        b_unit_task.set('unit_task:select_data state:end pu_type:ordered')
+        DM.request('planning_unit:?planning_unit cuelag:?cuel cue:select_data unit_task:ini_varPU task_type:punit calling:?calling')
+        b_focus.set('retrieving next step')
+
+    def selected_dict_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
+                         b_context='planning_unit:?planning_unit finished:?finished status:occupied data_def:none',
                          b_DM='unit_task:select_data store_type:?stype',
                          b_focus='select data 2'):
-        b_context.set('finished:select_data status:unoccupied store_type:?stype data_def:none')
+        b_context.set('planning_unit:?planning_unit finished:select_data status:unoccupied store_type:?stype data_def:none')
         b_unit_task.set('unit_task:select_data state:end pu_type:ordered')
-        b_focus.set('next unit')
+        DM.request('planning_unit:?planning_unit cuelag:?cuel cue:select_data unit_task:ini_dictPU task_type:punit calling:?calling')
+        b_focus.set('retrieving next step')
 
 
     # The size set productions retrieve a known size of data_store and initialize the data store 
     def size_set(b_unit_task='unit_task:size_set state:running pu_type:ordered',
-                 b_plan_unit='planning_unit:?planning_unit cuelag:none cue:start unit_task:size_set state:running',
+                 b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:?stype data_def:none',
                  b_focus='unit task'):
         DM.request('unit_task:size_set store_type:?stype data_def:?data')
         b_focus.set('size set 2')
