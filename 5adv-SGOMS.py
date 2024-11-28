@@ -7,7 +7,7 @@ This is a model of expert-like problem solving of the rainfall and ballot progra
 
 import sys
 import python_actr      
-log=python_actr.log()
+#log=python_actr.log()
 log=python_actr.log(html=True)   
 from python_actr import *  
 
@@ -171,7 +171,7 @@ class MyAgent(ACTR): # this is the agent that does the task
 
         #here we define the variables or dictionary used
         DM.add('unit_task:size_set store_type:dictionary data_def:((A:),(H:),(S:))')
-        DM.add('unit_task:size_set store_type:variables data_def:(AR, AB, HR, HB, SR, SB)')
+        DM.add('unit_task:size_set store_type:variables data_def:varibs')
 
 
         # Now we initialize our context and focus buffers
@@ -224,7 +224,7 @@ class MyAgent(ACTR): # this is the agent that does the task
     def retrieve_nxt_unit_task(b_unit_task='unit_task:?tunit state:end pu_type:ordered',
                                b_plan_unit='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?tunit task_type:?ttype calling:?calling',
                                b_focus='next unit'):
-        DM.request('planning_unit:?planning_unit cuelag:?cue cue:?tunit unit_task:?new_task task_type:?ttype calling:?calling')
+        DM.request('planning_unit:?planning_unit cuelag:?cue cue:?tunit unit_task:?new_task task_type:?newttype calling:?calling')
         b_focus.set('retrieving next step')
 
 
@@ -242,10 +242,10 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_context.set('planning_unit:?planning_unit finished:nothing status:occupied store_type:?type data_def:?data_def')
         b_plan_unit.set('planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:?tunit task_type:tunit calling:?calling')
         b_unit_task.set('unit_task:?tunit state:running pu_type:ordered')
-        b_focus('unit task')
+        b_focus.set('unit task')
 
     def retrieve_calling_unit(b_context='planning_unit:?planning_unit finished:?cue status:unoccupied store_type:?type data_def:?data_def',
-                              b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:finished task_type:?unit calling:?calling',
+                              b_DM='planning_unit:?planning_unit cuelag:?cuelag cue:?cue unit_task:finished task_type:finish calling:?calling',
                               b_focus='retrieving next step'):
         talk.talk('I think I should..')
         b_context.set('planning_unit:?calling finished:?planning_unit status:unoccupied store_type:?type data_def:?data_def')
@@ -264,19 +264,19 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_focus.set('select data 2')
 
     def selected_varib_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
-                          b_context='planning_unit:?planning_unit finished:?finished status:occupied data_def:none',
-                          b_DM='unit_task:select_data store_type:?stype',
+                          b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:none data_def:none',
+                          b_DM='unit_task:select_data store_type:variables',
                           b_focus='select data 2'):
-        b_context.set('planning_unit:?planning_unit finished:select_data status:unoccupied store_type:?stype data_def:none')
+        b_context.set('planning_unit:?planning_unit finished:select_data status:unoccupied store_type:variables data_def:none')
         b_unit_task.set('unit_task:select_data state:end pu_type:ordered')
         DM.request('planning_unit:?planning_unit cuelag:?cuel cue:select_data unit_task:ini_varPU task_type:punit calling:?calling')
         b_focus.set('retrieving next step')
 
     def selected_dict_ut(b_unit_task='unit_task:select_data state:running pu_type:ordered',
-                         b_context='planning_unit:?planning_unit finished:?finished status:occupied data_def:none',
-                         b_DM='unit_task:select_data store_type:?stype',
+                         b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:none data_def:none',
+                         b_DM='unit_task:select_data store_type:dictionary',
                          b_focus='select data 2'):
-        b_context.set('planning_unit:?planning_unit finished:select_data status:unoccupied store_type:?stype data_def:none')
+        b_context.set('planning_unit:?planning_unit finished:select_data status:unoccupied store_type:dictionary data_def:none')
         b_unit_task.set('unit_task:select_data state:end pu_type:ordered')
         DM.request('planning_unit:?planning_unit cuelag:?cuel cue:select_data unit_task:ini_dictPU task_type:punit calling:?calling')
         b_focus.set('retrieving next step')
@@ -295,6 +295,25 @@ class MyAgent(ACTR): # this is the agent that does the task
         b_context.set('planning_unit:?planning_unit finished:size_set status:unoccupied store_type:?stype data_def:?data_def')
         b_unit_task.set('unit_task:size_set state:end pu_type:ordered')
         b_focus.set('next unit')
+
+    def ini_var_ut(b_unit_task='unit_task:ini_var state:running pu_type:ordered',
+                   b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:variables data_def:?data_def',
+                   b_focus='unit task'):
+        motor.type_first('AR = 0, AB = 0, HR = 0, HB = 0, SR = 0, SB = 0')
+        talk.talk('AR = 0, AB = 0, HR = 0, HB = 0, SR = 0, SB = 0')
+        b_context.set('planning_unit:?planning_unit finished:ini_var status:unoccupied store_type:variables data_def:?data_def')
+        b_unit_task.set('unit_task:ini_var state:end pu_type:ordered')
+        b_focus.set('next unit')
+
+    def ini_dict_ut(b_unit_task='unit_task:ini_dict state:running pu_type:ordered',
+                    b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:dictionary data_def:?data_def',
+                    b_focus='unit task'):
+        motor.type_first('b_box = {(AR:0),(AB:0),(HR:0),(HB:0),(SR:0),(SB:0)}')
+        talk.talk('b_box = {(AR:0),(AB:0),(HR:0),(HB:0),(SR:0),(SB:0)}')
+        b_context.set('planning_unit:?planning_unit finished:ini_dict status:unoccupied store_type:dictionary data_def:?data_def')
+        b_unit_task.set('unit_task:ini_dict state:end pu_type:ordered')
+        b_focus.set('next unit')
+
 
 
 
