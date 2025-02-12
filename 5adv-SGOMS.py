@@ -138,9 +138,9 @@ class MyAgent(ACTR): # this is the agent that does the task
         """
 
         #PU that handles initializion of looping through the data, and attend to the correct kind of tracker
-        DM.add('planning_unit:run_loopPU        cuelag:none          cue:start            unit_task:stop_loopPU    task_type:punit    calling:dep_winsPU')
-        DM.add('planning_unit:run_loopPU        cuelag:start         cue:stop_loopPU      unit_task:trackPU        task_type:punit    calling:dep_winsPU')
-        DM.add('planning_unit:run_loopPU        cuelag:stop_loopPU   cue:trackPU          unit_task:finished       task_type:finish   calling:dep_winsPU')
+        DM.add('planning_unit:run_loopPU        cuelag:none          cue:start            unit_task:trackPU        task_type:punit    calling:dep_winsPU')
+        DM.add('planning_unit:run_loopPU        cuelag:start         cue:trackPU          unit_task:stop_loopPU    task_type:punit    calling:dep_winsPU')
+        DM.add('planning_unit:run_loopPU        cuelag:trackPU       cue:stop_loopPU      unit_task:finished       task_type:finish   calling:dep_winsPU')
         
  
         # PU that tracks the votes - variables
@@ -163,8 +163,8 @@ class MyAgent(ACTR): # this is the agent that does the task
         DM.add('unit_task:select_data store_type:variables')
 
         #here we define the variables or dictionary used
-        DM.add('unit_task:size_set store_type:dictionary data_def:dict')
-        DM.add('unit_task:size_set store_type:variables data_def:varibs')
+        DM.add('unit_task:size_set store_type:dictionary data_def:2x3')
+        DM.add('unit_task:size_set store_type:variables data_def:1x6')
 
         DM.add('unit_task:condition1 condition:-1')
 
@@ -210,7 +210,7 @@ class MyAgent(ACTR): # this is the agent that does the task
                           b_focus='retrieve first task'):
         b_unit_task.set('unit_task:?unit_task state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:?planning_unit cuelag:none cue:start unit_task:?unit_task task_type:tunit calling:?calling')
-        talk.talk('execute the goal ' + planning_unit)        
+        talk.talk('Goal:execute the goal ' + planning_unit)        
         b_context.set('planning_unit:?planning_unit finished:nothing status:occupied store_type:?stype data_def:?data_def stop:?stop')
         b_focus.set('unit task')
         print('running planning unit ')
@@ -308,20 +308,22 @@ class MyAgent(ACTR): # this is the agent that does the task
     #The following production initialize the data structure - either 6 variables or a 1x6 dictionary
 
     def ini_var_ut(b_unit_task='unit_task:ini_var state:running pu_type:ordered',
-                   b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:variables data_def:?data_def stop:?stop',
+                   b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:variables data_def:1x6 stop:?stop',
                    b_focus='unit task'):
         motor.type_first('AR = 0, AB = 0, HR = 0, HB = 0, SR = 0, SB = 0')
-        talk.talk('AR = 0, AB = 0, HR = 0, HB = 0, SR = 0, SB = 0')
-        b_context.set('planning_unit:?planning_unit finished:ini_var status:unoccupied store_type:variables data_def:?data_def stop:?stop')
+        talk.talk('STEP: AR = 0, AB = 0, HR = 0, HB = 0, SR = 0, SB = 0')
+        b_context.set('planning_unit:?planning_unit finished:ini_var status:unoccupied store_type:variables data_def:1x6 stop:?stop')
         b_unit_task.set('unit_task:ini_var state:end pu_type:ordered')
         b_focus.set('next unit')
 
     def ini_dict_ut(b_unit_task='unit_task:ini_dict state:running pu_type:ordered',
-                    b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:dictionary data_def:?data_def stop:?stop',
+                    b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:dictionary data_def:2x3 stop:?stop',
                     b_focus='unit task'):
-        motor.type_first('b_box = {("A","R"):0,("A","B"):0,("H","R"):0,("H","B"):0,("S","R"):0,("S","B"):0}')
-        talk.talk('b_box = {(AR:0),(AB:0),(HR:0),(HB:0),(SR:0),(SB:0)}')
-        b_context.set('planning_unit:?planning_unit finished:ini_dict status:unoccupied store_type:dictionary data_def:?data_def stop:?stop')
+        motor.type_first('r_box = {"A":0,"H":0,"S":0}')
+        talk.talk('STEP:r_box = {"A":0,"H":0,"S":0}')
+        motor.type_first('b_box = {"A":0,"H":0,"S":0}')
+        talk.talk('STEP: b_box = {"A":0,"H":0,"S":0}')
+        b_context.set('planning_unit:?planning_unit finished:ini_dict status:unoccupied store_type:dictionary data_def:2x3 stop:?stop')
         b_unit_task.set('unit_task:ini_dict state:end pu_type:ordered')
         b_focus.set('next unit')
 
@@ -330,9 +332,9 @@ class MyAgent(ACTR): # this is the agent that does the task
                    b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:?stype data_def:?data_def stop:?stop',
                    b_focus='unit task'):
         motor.type('    faculty = input("Faculty (-1 to end)")')
-        motor.type('        president = input("President")')
-        talk.talk('    faculty = input("Faculty (-1 to end)"')
-        talk.talk('         president = input("President")')
+        motor.type('    if faculty != -1: president = input("President")')
+        talk.talk('STEP:     faculty = input("Faculty (-1 to end)"')
+        talk.talk('STEP:     if faculty !=-1: president = input("President")')
         b_context.set('planning_unit:?planning_unit finished:request_in status:unoccupied store_type:?stype data_def:?data_def stop:?stop')
         b_unit_task.set('unit_task:request_in state:end pu_type:ordered')
         b_focus.set('next unit')
@@ -341,7 +343,7 @@ class MyAgent(ACTR): # this is the agent that does the task
                  b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:?stype data_def:?data_def stop:?stop',
                  b_focus='unit task'):
         motor.type('while True:')
-        talk.talk('while True:')
+        talk.talk('STEP: while True:')
         b_unit_task.set('unit_task:ite_loop state:end pu_type:ordered')
         b_context.set('planning_unit:?planning_unit finished:ite_loop status:unoccupied store_type:?stype data_def:?data_def stop:?stop')
         b_focus.set('next unit')
@@ -350,8 +352,10 @@ class MyAgent(ACTR): # this is the agent that does the task
     def select_ite_d(b_unit_task='unit_task:select_ite state:running pu_type:ordered',
                      b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:dictionary data_def:?data_def stop:?stop',
                      b_focus='unit task'):
-        motor.type('            b_box[(faculty,president)] += 1')
-        talk.talk('            b_box[(faculty,president)] += 1')
+        motor.type('            if president == "R": r_box[faculty] += 1')
+        talk.talk('STEP:             if president == R:_box[(faculty,president)] += 1')
+        motor.type('            else: b_box[faculty] += 1')
+        talk.talk('STEP:             else:b_box[faculty] += 1')
         b_context.set('planning_unit:?planning_unit finished:select_ite status:unoccupied store_type:dictionary data_def:?data_def stop:?stop')
         b_unit_task.set('unit_task:select_ite state:end pu_type:ordered')
         b_focus.set('next unit')
@@ -364,13 +368,13 @@ class MyAgent(ACTR): # this is the agent that does the task
         motor.type('            if faculty == H and president == R: HR+=1')
         motor.type('            if faculty == H and president == B: HB+=1')
         motor.type('            if faculty == S and president == R: SR+=1')
-        motor.type('            if faculty == S and president == B: SB+=1')
-        talk.talk('            if faculty == A and president == R: AR+=1')
-        talk.talk('            if faculty == A and president == B: AB+=1')
-        talk.talk('            if faculty == H and president == R: HR+=1')
-        talk.talk('            if faculty == H and president == B: HB+=1')
-        talk.talk('            if faculty == S and president == R: SR+=1')
-        talk.talk('            if faculty == S and president == B: SB+=1')
+        motor.type('STEP:            if faculty == S and president == B: SB+=1')
+        talk.talk('STEP:            if faculty == A and president == R: AR+=1')
+        talk.talk('STEP:            if faculty == A and president == B: AB+=1')
+        talk.talk('STEP:             if faculty == H and president == R: HR+=1')
+        talk.talk('STEP:            if faculty == H and president == B: HB+=1')
+        talk.talk('STEP:            if faculty == S and president == R: SR+=1')
+        talk.talk('STEP:             if faculty == S and president == B: SB+=1')
         b_context.set('planning_unit:?planning_unit finished:select_ite status:unoccupied store_type:variables data_def:?data_def stop:?stop')
         b_unit_task.set('unit_task:select_ite state:end pu_type:ordered')
         b_focus.set('next unit')
@@ -393,8 +397,8 @@ class MyAgent(ACTR): # this is the agent that does the task
     def stop_loop(b_unit_task='unit_task:stop_loop state:running pu_type:ordered',
                   b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:?stype data_def:?data_def stop:?stop',
                   b_focus='unit task'):
-        motor.type('        if faculty == -1: break')
-        talk.talk('         if faculty == -1: break')
+        motor.type('    if faculty == -1: break')
+        talk.talk('STEP:      if faculty == -1: break')
         b_unit_task.set('unit_task:stop_loop state:end pu_type:ordered')
         b_context.set('planning_unit:?planning_unit finished:stop_loop status:unoccupied store_type:?stype data_def:?data_def stop:?stop')
         b_focus.set('next unit')
@@ -402,18 +406,18 @@ class MyAgent(ACTR): # this is the agent that does the task
     def compare_d(b_unit_task='unit_task:compare state:running pu_type:ordered',
                   b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:dictionary data_def:?data_def stop:?stop',
                   b_focus='unit task'):
-        motor.type('if b_box[("A","R")] > b_box[("A","B")]: A+=1')
-        motor.type('if b_box[("A","R")] < b_box[("A","B")]: A-=1')
-        motor.type('if b_box[("S","R")] > b_box[("S","B")]: S+=1')
-        motor.type('if b_box[("S","R")] < b_box[("S","B")]: S-=1')
-        motor.type('if b_box[("H","R")] > b_box[("H","B")]: H+=1')
-        motor.type('if b_box[("H","R")] < b_box[("H","B")]: H-=1')
-        talk.talk('if b_box[("A","R")] > b_box[("A","B")]: A+=1')
-        talk.talk('if b_box[("A","R")] < b_box[("A","B")]: B+=1')
-        talk.talk('if b_box[("S","R")] > b_box[("S","B")]: A+=1')
-        talk.talk('if b_box[("S","R")] < b_box[("S","B")]: B+=1')
-        talk.talk('if b_box[("H","R")] > b_box[("H","B")]: A+=1')
-        talk.talk('if b_box[("H","R")] < b_box[("H","B")]: B+=1')
+        motor.type('if r_box["A"] > b_box["A"]: A+=1')
+        motor.type('if r_box["A"] < b_box["A"]: A-=1')
+        motor.type('if r_box["S"] > b_box["S"]: S+=1')
+        motor.type('if r_box["S"] < b_box["S"]: S-=1')
+        motor.type('if r_box["H"] > b_box["H"]: H+=1')
+        motor.type('if r_box["H"] < b_box["H"]: H-=1')
+        talk.talk('STEP: if r_box["A"] > b_box["A"]: A+=1')
+        talk.talk('STEP: if r_box["A"] < b_box["A"]: A-=1')
+        talk.talk('STEP: if r_box["S"] > b_box["S"]: S+=1')
+        talk.talk('STEP: if r_box["S"] < b_box["S"]: S-=1')
+        talk.talk('STEP: if r_box["H"] > b_box["H"]: H+=1')
+        talk.talk('STEP: if r_box["H"] < b_box["H"]: H-=1')
         b_context.set('planning_unit:?planning_unit finished:compare status:unoccupied store_type:dictionary data_def:?data_def stop:?stop')
         b_unit_task.set('unit_task:compare state:end pu_type:ordered')
         b_focus.set('next unit')
@@ -422,7 +426,7 @@ class MyAgent(ACTR): # this is the agent that does the task
                   b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:variables data_def:?data_def stop:?stop',
                   b_focus='unit task'):
         motor.type('if AR < AB: A-=1')
-        motor.type('if AR > AB: A+=1')
+        Motor.type('if AR > AB: A+=1')
         motor.type('if SR > SB: S+=1')
         motor.type('if SR < SB: S-=1')
         motor.type('if HR > HB: H+=1')
@@ -441,7 +445,7 @@ class MyAgent(ACTR): # this is the agent that does the task
                  b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:?stype data_def:?data_def stop:?stop',
                  b_focus='unit task'):
         motor.type('A = 0, H = 0, S = 0')
-        talk.talk('A = 0, H = 0, S = 0')
+        talk.talk('STEP: A = 0, H = 0, S = 0')
         b_context.set('planning_unit:?planning_unit finished:trackdep status:unoccupied store_type:?stype data_def:?data_def stop:?stop')
         b_unit_task.set('unit_task:trackdep state:end pu_type:ordered')
         b_focus.set('next unit')
@@ -451,7 +455,8 @@ class MyAgent(ACTR): # this is the agent that does the task
                b_focus='unit task'):
         motor.type('if A+H+S > 0: print("RED WINS")')
         motor.type('if A+H+S < 0: print("BLUE WINS")')
-        talk.talk('A = 0, H = 0, S = 0')
+        talk.talk('STEP: if A+H+S < 0: print("BLUE WINS")')
+        talk.talk('STEP: if A+H+S > 0: print("RED WINS")')
         b_context.set('planning_unit:?planning_unit finished:output status:unoccupied store_type:?stype data_def:?data_def stop:?stop')
         b_unit_task.set('unit_task:output state:end pu_type:ordered')
         b_focus.set('next unit')
