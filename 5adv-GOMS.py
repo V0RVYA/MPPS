@@ -210,7 +210,7 @@ class MyAgent(ACTR): # this is the agent that does the task
                           b_focus='retrieve first task'):
         b_unit_task.set('unit_task:?unit_task state:running pu_type:ordered')
         b_plan_unit.set('planning_unit:?planning_unit cuelag:none cue:start unit_task:?unit_task task_type:tunit calling:?calling')
-        talk.talk('Goal:execute the goal ' + planning_unit)        
+        talk.talk('Goal: execute the goal ' + planning_unit)        
         b_context.set('planning_unit:?planning_unit finished:nothing status:occupied store_type:?stype data_def:?data_def stop:?stop')
         b_focus.set('unit task')
         print('running planning unit ')
@@ -219,7 +219,7 @@ class MyAgent(ACTR): # this is the agent that does the task
                            b_DM='planning_unit:?planning_unit cuelag:none cue:start unit_task:?unit_task task_type:punit calling:?calling',
                            b_focus='retrieve first task'):
         DM.request('planning_unit:?unit_task cuelag:none cue:start unit_task:? task_type:? calling:?planning_unit')
-        talk.talk('execute the goal ' + planning_unit)        
+        talk.talk('Goal: execute the goal ' + planning_unit)        
         b_context.set('planning_unit:?unit_task finished:nothing status:unoccupied store_type:?stype data_def:?data_def stop:?stop')
         b_focus.set('retrieve first task')
       
