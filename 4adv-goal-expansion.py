@@ -31,7 +31,8 @@ class Chronotrans(python_actr.Model):     # tracks cognitive and programming ste
 class MyAgent(ACTR): #This is the class defining the agent
     #These are the buffers which the agent uses to manage information between modules (DM, Motor, etc) and the agent
     focus=Buffer()
-    motor=MotorModule()
+    b_motor=Buffer()
+    motor=MotorModule(b_motor)
     DMbuffer=Buffer()
     plan_step = Buffer()
     talk=Chronotrans()
@@ -70,7 +71,7 @@ class MyAgent(ACTR): #This is the class defining the agent
         DM.add('keyword:stop        request:step    variable1:None          variable2:None      variable3:None     variable4:None       variable5:None')
 
 
-
+        motor.type_first("Python program for ballot problem")
         
         #plan_variables.set("variable1:none variable2:none variable3:none variable4:none")
         focus.set("read")

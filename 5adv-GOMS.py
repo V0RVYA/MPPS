@@ -426,7 +426,7 @@ class MyAgent(ACTR): # this is the agent that does the task
                   b_context='planning_unit:?planning_unit finished:?finished status:occupied store_type:variables data_def:?data_def stop:?stop',
                   b_focus='unit task'):
         motor.type('if AR < AB: A-=1')
-        Motor.type('if AR > AB: A+=1')
+        motor.type('if AR > AB: A+=1')
         motor.type('if SR > SB: S+=1')
         motor.type('if SR < SB: S-=1')
         motor.type('if HR > HB: H+=1')
